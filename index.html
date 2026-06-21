@@ -69,9 +69,19 @@
   </div>
 
   <script>
-    // Read the name from the link: ?name=Riya  (or  ?to=Riya)
+    // Read the name from the link. Preferred: ?b=<base64> so the name is NOT
+    // readable in the link. Still supports ?name=Riya for convenience.
     const params = new URLSearchParams(window.location.search);
-    let name = params.get('name') || params.get('to') || params.get('n') || '';
+    let name = '';
+    const enc = params.get('b') || params.get('id');
+    if (enc) {
+      try {
+        let b = enc.replace(/-/g,'+').replace(/_/g,'/');
+        while (b.length % 4) b += '=';
+        name = decodeURIComponent(escape(atob(b)));
+      } catch (e) { name = ''; }
+    }
+    if (!name) name = params.get('name') || params.get('to') || params.get('n') || '';
     name = decodeURIComponent(name).trim();
     if (name) {
       name = name.replace(/\b\w/g, c => c.toUpperCase());
